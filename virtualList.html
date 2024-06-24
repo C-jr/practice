@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+
+		<script src="js/v3.2.8/vue.global.prod.js" type="text/javascript" charset="utf-8"></script>
+		<link href="css/DynamicH.css" rel="stylesheet" />
+	</head>
+	<body>
+		<div id="app">
+			<div class="list" ref="listRef" @scroll="onScroll">
+				<!-- 撑出滚动条 -->
+				<div class="virtualScroller" :style="{ height: listsH + 'px' }"></div>
+				<!-- 虚拟列表 -->
+				<div class="scrollView" :style="{ transform: `translateY(${this.startOffset}px)` }">
+					<div class="card" v-for="item in tableList">
+						{{item.text}}
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			const App = {
+				data() {
+					return {
+						counter: 0,
+						totalList: [],
+						tableList: [],
+						listsH: 0,
+						containerHeight:0,
+						itemSize: 52,
+						startOffset: 0
+					}
+				},
+				mounted() {
+					const list = []
+					for (let i = 0; i < 500; i++) {
+						list.push({
+							index: i,
+							text: 'text' + i
+						})
+					}
+					this.totalList = list
+					this.listsH = this.totalList.length * this.itemSize
+					this.initCount()
+				},
+				methods: {
+					initCount() {
+						this.$nextTick(() => {
+							const listH = this.$refs.listRef.clientHeight
+							const num = parseInt(listH / this.itemSize)							
+							this.containerHeight = listH
+							this.tableList = this.totalList.slice(0, num)
+							console.log(listH,  num)
+						})
+					},
+					onScroll() {
+						//当前滚动位置
+						let scrollTop = this.$refs.listRef.scrollTop;
+						// 列表开始索引
+						let startIndex = Math.floor(scrollTop / this.itemSize);
+						// 列表结束索引
+						let endIndex = Math.ceil((scrollTop + this.containerHeight) / this.itemSize);
+						this.tableList = this.totalList.slice(startIndex, endIndex);
+						// 列表移动距离
+						this.startOffset = scrollTop - (scrollTop % this.itemSize);
+					}
+				},
+			};
+			Vue.createApp(App).mount('#app');
+		</script>
+	</body>
+</html>
